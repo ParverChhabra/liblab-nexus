@@ -28,7 +28,7 @@ export const usePartnerPocs = () => {
   return useQuery({
     queryKey: ['partnerPocs'],
     queryFn: async () => {
-      // Since there's no list endpoint in swagger, we'll simulate
+      // Since there's no list endpoint, we'll return empty array
       return [];
     },
   });
@@ -75,6 +75,34 @@ export const useActivityPartners = (params?: any) => {
     queryFn: async () => {
       const sdk = getPocSdk();
       return await sdk.activityPartner.getActivityPartners(params);
+    },
+  });
+};
+
+export const useUpdatePartnerPoc = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const sdk = getPocSdk();
+      return await sdk.partnerPoc.updatePartnerPoc(id, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['partnerPocs'] });
+    },
+  });
+};
+
+export const useDeletePartnerPoc = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const sdk = getPocSdk();
+      return await sdk.partnerPoc.deletePartnerPoc(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['partnerPocs'] });
     },
   });
 };
