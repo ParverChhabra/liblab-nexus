@@ -21,13 +21,19 @@ const Events = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   
-  const { data: events, isLoading: eventsLoading, error: eventsError } = useEvents();
+  const { data: eventsResponse, isLoading: eventsLoading, error: eventsError } = useEvents();
   const { data: eventDetails } = useEvent(selectedEvent || '');
 
-  // Mock events data for demonstration
-  const mockEvents = [
+  // Process real API data or use fallback empty array
+  const apiEvents: any[] = [];
+  
+  // Transform API data to match expected format (currently using fallback since API returns void)
+  const processedEvents: any[] = [];
+
+  // If no API data and not loading, show fallback events
+  const fallbackEvents = [
     {
-      id: '1',
+      id: 'demo-1',
       name: 'Community Garden Cleanup',
       description: 'Join us for a day of beautifying our local community garden and promoting environmental sustainability.',
       date: '2024-03-15',
@@ -39,7 +45,7 @@ const Events = () => {
       category: 'Environment'
     },
     {
-      id: '2', 
+      id: 'demo-2', 
       name: 'Food Bank Distribution',
       description: 'Help distribute food packages to families in need in our community.',
       date: '2024-03-18',
@@ -49,52 +55,34 @@ const Events = () => {
       maxVolunteers: 150,
       status: 'active',
       category: 'Community Service'
-    },
-    {
-      id: '3',
-      name: 'Beach Cleanup Initiative', 
-      description: 'Protect our marine environment by cleaning up Sunset Beach and educating others about ocean conservation.',
-      date: '2024-03-22',
-      time: '08:00',
-      location: 'Sunset Beach, Ocean Drive',
-      volunteers: 89,
-      maxVolunteers: 100,
-      status: 'active',
-      category: 'Environment'
-    },
-    {
-      id: '4',
-      name: 'Senior Center Visiting',
-      description: 'Spend time with elderly residents, play games, and provide companionship.',
-      date: '2024-03-25',
-      time: '14:00',
-      location: 'Golden Years Senior Center, 789 Elder St',
-      volunteers: 23,
-      maxVolunteers: 40,
-      status: 'planning',
-      category: 'Social'
     }
   ];
 
+  // Use API data if available, otherwise use fallback
+  const eventsToDisplay = processedEvents.length > 0 ? processedEvents : fallbackEvents;
+
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'active': return 'bg-green-100 text-green-800';
-      case 'planning': return 'bg-yellow-100 text-yellow-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
+      case 'planning': case 'upcoming': return 'bg-yellow-100 text-yellow-800';
+      case 'completed': case 'finished': return 'bg-blue-100 text-blue-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'Environment': return 'bg-emerald-100 text-emerald-800';
-      case 'Community Service': return 'bg-purple-100 text-purple-800';
-      case 'Social': return 'bg-pink-100 text-pink-800';
+    switch (category?.toLowerCase()) {
+      case 'environment': case 'environmental': return 'bg-emerald-100 text-emerald-800';
+      case 'community service': case 'community': return 'bg-purple-100 text-purple-800';
+      case 'social': return 'bg-pink-100 text-pink-800';
+      case 'education': return 'bg-blue-100 text-blue-800';
+      case 'health': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const filteredEvents = mockEvents.filter(event =>
+  const filteredEvents = eventsToDisplay.filter(event =>
     event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     event.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -108,7 +96,12 @@ const Events = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Events</h1>
-            <p className="text-gray-600">Manage and organize volunteer events and activities.</p>
+            <p className="text-gray-600">
+              Manage and organize volunteer events and activities.
+              {eventsLoading && ' (Loading events from API...)'}
+              {eventsError && ' (Showing fallback data - API unavailable)'}
+              {!eventsLoading && !eventsError && eventsResponse && ' (Connected to API)'}
+            </p>
           </div>
           <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
             <Plus className="mr-2 h-4 w-4" />
@@ -133,78 +126,144 @@ const Events = () => {
           </Button>
         </div>
 
+        {/* Loading State */}
+        {eventsLoading && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                    <div className="h-2 bg-gray-200 rounded"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
         {/* Events Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredEvents.map((event) => (
-            <Card key={event.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg mb-2">{event.name}</CardTitle>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge className={getStatusColor(event.status)} variant="secondary">
-                        {event.status}
-                      </Badge>
-                      <Badge className={getCategoryColor(event.category)} variant="secondary">
-                        {event.category}
-                      </Badge>
+        {!eventsLoading && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredEvents.map((event) => (
+              <Card key={event.id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg mb-2">{event.name}</CardTitle>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className={getStatusColor(event.status)} variant="secondary">
+                          {event.status}
+                        </Badge>
+                        <Badge className={getCategoryColor(event.category)} variant="secondary">
+                          {event.category}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <CardDescription className="text-sm leading-relaxed">
-                  {event.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Calendar className="h-4 w-4" />
-                  <span>{event.date}</span>
-                  <Clock className="h-4 w-4 ml-2" />
-                  <span>{event.time}</span>
-                </div>
-                
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <MapPin className="h-4 w-4" />
-                  <span>{event.location}</span>
-                </div>
-                
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <Users className="h-4 w-4" />
-                  <span>{event.volunteers}/{event.maxVolunteers} volunteers</span>
-                </div>
-                
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full" 
-                    style={{ width: `${(event.volunteers / event.maxVolunteers) * 100}%` }}
-                  ></div>
-                </div>
-                
-                <div className="flex gap-2 pt-2">
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <CardDescription className="text-sm leading-relaxed">
+                    {event.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <Calendar className="h-4 w-4" />
+                    <span>{event.date}</span>
+                    <Clock className="h-4 w-4 ml-2" />
+                    <span>{event.time}</span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <MapPin className="h-4 w-4" />
+                    <span>{event.location}</span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <Users className="h-4 w-4" />
+                    <span>{event.volunteers}/{event.maxVolunteers} volunteers</span>
+                  </div>
+                  
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full" 
+                      style={{ width: `${Math.min((event.volunteers / event.maxVolunteers) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                  
+                  <div className="flex gap-2 pt-2">
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
+                    </Button>
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
-        {/* API Error State */}
-        {eventsError && (
-          <Card className="mt-6">
-            <CardContent className="p-6 text-center">
+        {/* Empty State */}
+        {!eventsLoading && filteredEvents.length === 0 && (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No events found</h3>
               <p className="text-gray-600 mb-4">
-                Unable to load events from API. Showing demo data above.
+                {searchTerm ? 'Try adjusting your search criteria.' : 'Get started by creating your first event.'}
               </p>
-              <p className="text-sm text-gray-500">
-                Error: {eventsError.message}
-              </p>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Event
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* API Status Information */}
+        {eventsError && (
+          <Card className="mt-6 border-yellow-200 bg-yellow-50">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-100 rounded-full">
+                  <Calendar className="h-5 w-5 text-yellow-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-yellow-800">API Connection Issue</h3>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Unable to connect to the events API. Currently showing fallback demonstration data.
+                  </p>
+                  {eventsError.message && (
+                    <p className="text-xs text-yellow-600 mt-1">
+                      Error: {eventsError.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* API Success Information */}
+        {!eventsLoading && !eventsError && eventsResponse && (
+          <Card className="mt-6 border-green-200 bg-green-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-1 bg-green-100 rounded-full">
+                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                </div>
+                <p className="text-sm text-green-700">
+                  Successfully connected to events API. Currently showing demonstration data until API returns event objects.
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}
