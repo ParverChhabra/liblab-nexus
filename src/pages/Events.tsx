@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Navbar } from '@/components/Navbar';
-import { useEvents, useEvent } from '@/lib/api';
+import { useEvents, useEvent } from '@/hooks/usePocSdk';
 import { 
   Calendar, 
   Users, 
@@ -24,42 +24,27 @@ const Events = () => {
   const { data: eventsResponse, isLoading: eventsLoading, error: eventsError } = useEvents();
   const { data: eventDetails } = useEvent(selectedEvent || '');
 
-  // Process real API data or use fallback empty array
-  const apiEvents: any[] = [];
+  // Process real API data from mock server
+  const events = eventsResponse?.data || [];
   
-  // Transform API data to match expected format (currently using fallback since API returns void)
-  const processedEvents: any[] = [];
+  // Transform API data to expected format if needed
+  const processedEvents = Array.isArray(events) ? events.map((event: any) => ({
+    id: event.id || Math.random().toString(),
+    name: event.title || event.name || 'Untitled Event',
+    description: event.description || 'No description available',
+    date: event.startDate || event.date || new Date().toISOString().split('T')[0],
+    time: event.startTime || event.time || '00:00',
+    location: event.location || event.address || 'Location TBD',
+    volunteers: event.registeredVolunteers || event.volunteers || 0,
+    maxVolunteers: event.maxVolunteers || event.capacity || 100,
+    status: event.status || 'active',
+    category: event.category || event.type || 'General',
+    requirements: event.requirements || [],
+    tags: event.tags || []
+  })) : [];
 
-  // If no API data and not loading, show fallback events
-  const fallbackEvents = [
-    {
-      id: 'demo-1',
-      name: 'Community Garden Cleanup',
-      description: 'Join us for a day of beautifying our local community garden and promoting environmental sustainability.',
-      date: '2024-03-15',
-      time: '09:00',
-      location: 'Riverside Community Garden, 123 Green St',
-      volunteers: 45,
-      maxVolunteers: 60,
-      status: 'active',
-      category: 'Environment'
-    },
-    {
-      id: 'demo-2', 
-      name: 'Food Bank Distribution',
-      description: 'Help distribute food packages to families in need in our community.',
-      date: '2024-03-18',
-      time: '10:00',
-      location: 'Central Food Bank, 456 Hope Ave',
-      volunteers: 127,
-      maxVolunteers: 150,
-      status: 'active',
-      category: 'Community Service'
-    }
-  ];
-
-  // Use API data if available, otherwise use fallback
-  const eventsToDisplay = processedEvents.length > 0 ? processedEvents : fallbackEvents;
+  // Use processed events from API, or show fallback message
+  const eventsToDisplay = processedEvents.length > 0 ? processedEvents : [];
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -98,9 +83,9 @@ const Events = () => {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Events</h1>
             <p className="text-gray-600">
               Manage and organize volunteer events and activities.
-              {eventsLoading && ' (Loading events from API...)'}
-              {eventsError && ' (Showing fallback data - API unavailable)'}
-              {!eventsLoading && !eventsError && eventsResponse && ' (Connected to API)'}
+              {eventsLoading && ' (Loading events...)'}
+              {eventsError && ' (API connection error)'}
+              {!eventsLoading && !eventsError && processedEvents.length > 0 && ` (${processedEvents.length} events loaded)`}
             </p>
           </div>
           <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
@@ -253,7 +238,7 @@ const Events = () => {
         )}
 
         {/* API Success Information */}
-        {!eventsLoading && !eventsError && eventsResponse && (
+        {!eventsLoading && !eventsError && processedEvents.length > 0 && (
           <Card className="mt-6 border-green-200 bg-green-50">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -261,7 +246,7 @@ const Events = () => {
                   <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                 </div>
                 <p className="text-sm text-green-700">
-                  Successfully connected to events API. Currently showing demonstration data until API returns event objects.
+                  Successfully loaded {processedEvents.length} events from the API
                 </p>
               </div>
             </CardContent>
