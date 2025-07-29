@@ -1,0 +1,165 @@
+# VolunteerSubmissionService
+
+A list of all methods in the `VolunteerSubmissionService` service. Click on the method name to view detailed information about that method.
+
+| Methods                                                                                                   | Description |
+| :-------------------------------------------------------------------------------------------------------- | :---------- |
+| [volunteerSubmissionControllerCreate](#volunteersubmissioncontrollercreate)                               |             |
+| [volunteerSubmissionControllerGetPresignedUploadUrl](#volunteersubmissioncontrollergetpresigneduploadurl) |             |
+| [volunteerSubmissionControllerGetEvent](#volunteersubmissioncontrollergetevent)                           |             |
+| [volunteerSubmissionControllerGetByEventId](#volunteersubmissioncontrollergetbyeventid)                   |             |
+| [volunteerSubmissionControllerGet](#volunteersubmissioncontrollerget)                                     |             |
+
+## volunteerSubmissionControllerCreate
+
+- HTTP Method: `POST`
+- Endpoint: `/v2/volunteer_submission`
+
+**Parameters**
+
+| Name | Type                                                                              | Required | Description       |
+| :--- | :-------------------------------------------------------------------------------- | :------- | :---------------- |
+| body | [CreateVolunteerSubmissionRequest](../models/CreateVolunteerSubmissionRequest.md) | ✅       | The request body. |
+
+**Example Usage Code Snippet**
+
+```typescript
+import { CreateVolunteerSubmissionRequest, PocSdk } from 'poc-sdk';
+
+(async () => {
+  const pocSdk = new PocSdk({
+    token: 'YOUR_TOKEN',
+  });
+
+  const createVolunteerSubmissionRequest: CreateVolunteerSubmissionRequest = {
+    email: 'email',
+    submissionLinks: 'submissionLinks',
+    additionalMessage: 'additionalMessage',
+    eventId: 'eventId',
+  };
+
+  const { data } = await pocSdk.volunteerSubmission.volunteerSubmissionControllerCreate(
+    createVolunteerSubmissionRequest,
+  );
+
+  console.log(data);
+})();
+```
+
+## volunteerSubmissionControllerGetPresignedUploadUrl
+
+- HTTP Method: `POST`
+- Endpoint: `/v2/volunteer_submission/signed-url/upload`
+
+**Parameters**
+
+| Name | Type                                                                            | Required | Description       |
+| :--- | :------------------------------------------------------------------------------ | :------- | :---------------- |
+| body | [CreatePresignedUploadUrlRequest](../models/CreatePresignedUploadUrlRequest.md) | ✅       | The request body. |
+
+**Example Usage Code Snippet**
+
+```typescript
+import { CreatePresignedUploadUrlRequest, PocSdk } from 'poc-sdk';
+
+(async () => {
+  const pocSdk = new PocSdk({
+    token: 'YOUR_TOKEN',
+  });
+
+  const createPresignedUploadUrlRequest: CreatePresignedUploadUrlRequest = {
+    bucket: 'bucket',
+    key: 'key',
+    filePath: 'filePath',
+  };
+
+  const { data } = await pocSdk.volunteerSubmission.volunteerSubmissionControllerGetPresignedUploadUrl(
+    createPresignedUploadUrlRequest,
+  );
+
+  console.log(data);
+})();
+```
+
+## volunteerSubmissionControllerGetEvent
+
+- HTTP Method: `GET`
+- Endpoint: `/v2/volunteer_submission/fetch/event/{eventId}`
+
+**Parameters**
+
+| Name    | Type   | Required | Description |
+| :------ | :----- | :------- | :---------- |
+| eventId | string | ✅       |             |
+
+**Example Usage Code Snippet**
+
+```typescript
+import { PocSdk } from 'poc-sdk';
+
+(async () => {
+  const pocSdk = new PocSdk({
+    token: 'YOUR_TOKEN',
+  });
+
+  const { data } = await pocSdk.volunteerSubmission.volunteerSubmissionControllerGetEvent('eventId');
+
+  console.log(data);
+})();
+```
+
+## volunteerSubmissionControllerGetByEventId
+
+- HTTP Method: `GET`
+- Endpoint: `/v2/volunteer_submission/event/{eventId}`
+
+**Parameters**
+
+| Name    | Type   | Required | Description |
+| :------ | :----- | :------- | :---------- |
+| eventId | string | ✅       |             |
+
+**Example Usage Code Snippet**
+
+```typescript
+import { PocSdk } from 'poc-sdk';
+
+(async () => {
+  const pocSdk = new PocSdk({
+    token: 'YOUR_TOKEN',
+  });
+
+  const { data } = await pocSdk.volunteerSubmission.volunteerSubmissionControllerGetByEventId('eventId');
+
+  console.log(data);
+})();
+```
+
+## volunteerSubmissionControllerGet
+
+- HTTP Method: `GET`
+- Endpoint: `/v2/volunteer_submission/{id}`
+
+**Parameters**
+
+| Name | Type   | Required | Description |
+| :--- | :----- | :------- | :---------- |
+| id   | string | ✅       |             |
+
+**Example Usage Code Snippet**
+
+```typescript
+import { PocSdk } from 'poc-sdk';
+
+(async () => {
+  const pocSdk = new PocSdk({
+    token: 'YOUR_TOKEN',
+  });
+
+  const { data } = await pocSdk.volunteerSubmission.volunteerSubmissionControllerGet('id');
+
+  console.log(data);
+})();
+```
+
+<!-- This file was generated by liblab | https://liblab.com/ -->
