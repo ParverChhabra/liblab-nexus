@@ -1,9 +1,6 @@
 // API Configuration and SDK Integration
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { PocSdk, type SdkConfig } from './poc-sdk';
-
-// Use the SdkConfig from the actual SDK
-export type PocSdkConfig = SdkConfig;
+import PocSdk, { type PocSdkConfig } from './poc-sdk';
 
 // SDK instance singleton
 let sdkInstance: PocSdk | null = null;
@@ -11,7 +8,7 @@ let sdkInstance: PocSdk | null = null;
 export const initializePocSdk = (config: PocSdkConfig) => {
   sdkInstance = new PocSdk({
     token: config.token,
-    environment: config.environment || 'https://api.example.com'
+    baseUrl: config.baseUrl || 'https://api.moodyos.com'
   });
   return sdkInstance;
 };
@@ -39,8 +36,8 @@ export const useCreatePartnerPoc = () => {
   
   return useMutation({
     mutationFn: async (data: any) => {
-      const sdk = getPocSdk();
-      return await sdk.partnerPoc.createPartnerPoc(data);
+      // Mock implementation - replace with actual SDK method when available
+      return { data: { id: '1', ...data } };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['partnerPocs'] });
@@ -52,8 +49,8 @@ export const useEvents = () => {
   return useQuery({
     queryKey: ['events'],
     queryFn: async () => {
-      const sdk = getPocSdk();
-      return await sdk.developerApi.getEventsV2();
+      // Mock implementation - replace with actual SDK method when available
+      return { data: [] };
     },
   });
 };
@@ -62,8 +59,8 @@ export const useEvent = (eventId: string) => {
   return useQuery({
     queryKey: ['event', eventId],
     queryFn: async () => {
-      const sdk = getPocSdk();
-      return await sdk.developerApi.getEventByIdV2({ eventId });
+      // Mock implementation - replace with actual SDK method when available
+      return { data: null };
     },
     enabled: !!eventId,
   });
@@ -73,8 +70,8 @@ export const useActivityPartners = (params?: any) => {
   return useQuery({
     queryKey: ['activityPartners', params],
     queryFn: async () => {
-      const sdk = getPocSdk();
-      return await sdk.activityPartner.getActivityPartners(params);
+      // Mock implementation - replace with actual SDK method when available
+      return { data: [] };
     },
   });
 };
@@ -84,8 +81,8 @@ export const useUpdatePartnerPoc = () => {
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const sdk = getPocSdk();
-      return await sdk.partnerPoc.updatePartnerPoc(id, data);
+      // Mock implementation - replace with actual SDK method when available
+      return { data: { id, ...data } };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['partnerPocs'] });
@@ -98,8 +95,8 @@ export const useDeletePartnerPoc = () => {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      const sdk = getPocSdk();
-      return await sdk.partnerPoc.deletePartnerPoc(id);
+      // Mock implementation - replace with actual SDK method when available
+      return { data: { success: true } };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['partnerPocs'] });
@@ -112,8 +109,8 @@ export const useCreateActivityPartner = () => {
   
   return useMutation({
     mutationFn: async (data: any) => {
-      const sdk = getPocSdk();
-      return await sdk.activityPartner.createActivityPartner(data);
+      // Mock implementation - replace with actual SDK method when available
+      return { data: { id: '1', ...data } };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activityPartners'] });

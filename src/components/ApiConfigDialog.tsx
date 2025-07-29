@@ -31,7 +31,7 @@ export function ApiConfigDialog() {
     // Initialize SDK with new config
     initializePocSdk({
       token: tempToken.trim(),
-      environment: tempBaseUrl.trim(),
+      baseUrl: tempBaseUrl.trim(),
     });
 
     toast({
