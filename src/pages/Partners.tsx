@@ -9,7 +9,7 @@ import { usePartners } from '@/hooks/usePocSdk';
 const Partners = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { data: partnersResponse, isLoading, error } = usePartners();
-  const partners = partnersResponse?.data || [];
+  const partners = Array.isArray(partnersResponse?.data) ? partnersResponse.data : [];
 
   const filteredPartners = partners.filter(partner =>
     partner.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||

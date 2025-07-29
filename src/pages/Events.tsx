@@ -24,8 +24,8 @@ const Events = () => {
   const { data: eventsResponse, isLoading: eventsLoading, error: eventsError } = useEvents();
   const { data: eventDetails } = useEvent(selectedEvent || '');
 
-  // Process real API data from mock server
-  const events = eventsResponse?.data || [];
+  // Process real API data
+  const events = Array.isArray(eventsResponse?.data) ? eventsResponse.data : [];
   
   // Transform API data to expected format if needed
   const processedEvents = Array.isArray(events) ? events.map((event: any) => ({
