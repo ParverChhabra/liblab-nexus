@@ -56,7 +56,10 @@ const Index = () => {
                 </p>
                 <div className="flex gap-4">
                   <button
-                    onClick={() => setActiveTab('config')}
+                    onClick={() => {
+                      console.log('Config button clicked, current tab:', activeTab);
+                      setActiveTab('config');
+                    }}
                     className={`px-6 py-2 rounded-lg transition-colors ${
                       activeTab === 'config' ? 'bg-white/20' : 'bg-white/10 hover:bg-white/15'
                     }`}
@@ -65,7 +68,10 @@ const Index = () => {
                     API Config
                   </button>
                   <button
-                    onClick={() => setActiveTab('api')}
+                    onClick={() => {
+                      console.log('API Test button clicked, current tab:', activeTab);
+                      setActiveTab('api');
+                    }}
                     className={`px-6 py-2 rounded-lg transition-colors ${
                       activeTab === 'api' ? 'bg-white/20' : 'bg-white/10 hover:bg-white/15'
                     }`}
@@ -73,7 +79,10 @@ const Index = () => {
                     Live API Test
                   </button>
                   <button
-                    onClick={() => setActiveTab('overview')}
+                    onClick={() => {
+                      console.log('Overview button clicked, current tab:', activeTab);
+                      setActiveTab('overview');
+                    }}
                     className={`px-6 py-2 rounded-lg transition-colors ${
                       activeTab === 'overview' ? 'bg-white/20' : 'bg-white/10 hover:bg-white/15'
                     }`}

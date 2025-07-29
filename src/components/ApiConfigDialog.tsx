@@ -15,6 +15,7 @@ export function ApiConfigDialog() {
   const { toast } = useToast();
 
   const handleSave = () => {
+    console.log('Save button clicked', { tempToken, tempBaseUrl });
     if (!tempToken.trim()) {
       toast({
         title: "Error",
