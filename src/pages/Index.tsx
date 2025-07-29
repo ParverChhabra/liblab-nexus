@@ -16,18 +16,18 @@ import {
 import heroImage from "@/assets/hero-bg.jpg";
 
 const Index = () => {
-  const { apiToken, baseUrl } = useApiStore();
+  const { apiToken, environment } = useApiStore();
   const [activeTab, setActiveTab] = useState<'config' | 'api' | 'overview'>('overview');
 
   // Initialize SDK when API config changes
   useEffect(() => {
-    if (apiToken && baseUrl) {
+    if (apiToken && environment) {
       initializePocSdk({
         token: apiToken,
-        baseUrl,
+        environment,
       });
     }
-  }, [apiToken, baseUrl]);
+  }, [apiToken, environment]);
 
   return (
     <div className="flex min-h-screen bg-background">

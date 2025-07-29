@@ -9,9 +9,9 @@ import { Settings, Key, Server } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export function ApiConfigDialog() {
-  const { apiToken, baseUrl, setApiToken, setBaseUrl } = useApiStore();
+  const { apiToken, environment, setApiToken, setEnvironment } = useApiStore();
   const [tempToken, setTempToken] = useState(apiToken || '');
-  const [tempBaseUrl, setTempBaseUrl] = useState(baseUrl);
+  const [tempBaseUrl, setTempBaseUrl] = useState(environment);
   const { toast } = useToast();
 
   const handleSave = () => {
@@ -25,12 +25,12 @@ export function ApiConfigDialog() {
     }
 
     setApiToken(tempToken.trim());
-    setBaseUrl(tempBaseUrl.trim());
+    setEnvironment(tempBaseUrl.trim());
     
     // Initialize SDK with new config
     initializePocSdk({
       token: tempToken.trim(),
-      baseUrl: tempBaseUrl.trim(),
+      environment: tempBaseUrl.trim(),
     });
 
     toast({

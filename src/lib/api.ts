@@ -1,112 +1,18 @@
 // API Configuration and SDK Integration
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { PocSdk, type SdkConfig } from './poc-sdk';
 
-// SDK Configuration Interface
-interface PocSdkConfig {
-  token: string;
-  baseUrl?: string;
-}
-
-// Mock SDK class based on the liblab generated structure
-class PocSdk {
-  private config: PocSdkConfig;
-
-  constructor(config: PocSdkConfig) {
-    this.config = config;
-  }
-
-  get partnerPoc() {
-    return {
-      create: async (data: any) => this.request('POST', '/v2/partner/poc', data),
-      update: async (id: string, data: any) => this.request('PUT', `/v2/partner/poc/${id}`, data),
-      delete: async (id: string) => this.request('DELETE', `/v2/partner/poc/${id}`),
-    };
-  }
-
-  get developerApi() {
-    return {
-      v2: {
-        events: {
-          list: async () => this.request('GET', '/v2/developer-api/v2/events'),
-          get: async (eventId: string) => this.request('GET', `/v2/developer-api/v2/events/${eventId}`),
-        },
-        registrations: {
-          create: async (data: any) => this.request('POST', '/v2/developer-api/v2/registrations', data),
-          delete: async (registrationId: string) => this.request('DELETE', `/v2/developer-api/v2/registrations/${registrationId}`),
-        },
-      },
-    };
-  }
-
-  get activityPartner() {
-    return {
-      list: async (params?: any) => this.request('GET', '/v2/activity-partner', undefined, params),
-      create: async (data: any) => this.request('POST', '/v2/activity-partner', data),
-      get: async (id: string) => this.request('GET', `/v2/activity-partner/${id}`),
-      update: async (id: string, data: any) => this.request('PUT', `/v2/activity-partner/${id}`, data),
-      delete: async (id: string) => this.request('DELETE', `/v2/activity-partner/${id}`),
-    };
-  }
-
-  get booking() {
-    return {
-      syncRegistration: async (data: any) => this.request('POST', '/v2/booking/registration', data),
-      bulkSyncRegistration: async (data: any) => this.request('POST', '/v2/booking/registration/bulk', data),
-      findByThirdPartyId: async (thirdPartyId: string) => this.request('GET', `/v2/booking/third-party-id/${thirdPartyId}`),
-    };
-  }
-
-  private async request(method: string, endpoint: string, data?: any, params?: any): Promise<any> {
-    const baseUrl = this.config.baseUrl || 'https://api.example.com'; // Replace with actual API base URL
-    const url = new URL(endpoint, baseUrl);
-    
-    if (params) {
-      Object.keys(params).forEach(key => {
-        if (params[key] !== undefined) {
-          url.searchParams.append(key, params[key]);
-        }
-      });
-    }
-
-    const headers: HeadersInit = {
-      'Authorization': `Bearer ${this.config.token}`,
-      'Content-Type': 'application/json',
-    };
-
-    const config: RequestInit = {
-      method,
-      headers,
-    };
-
-    if (data) {
-      config.body = JSON.stringify(data);
-    }
-
-    try {
-      const response = await fetch(url.toString(), config);
-      
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-      }
-
-      // Handle empty responses (204, etc.)
-      if (response.status === 204 || response.headers.get('content-length') === '0') {
-        return null;
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error(`API Request failed:`, error);
-      throw error;
-    }
-  }
-}
+// Use the SdkConfig from the actual SDK
+export type PocSdkConfig = SdkConfig;
 
 // SDK instance singleton
 let sdkInstance: PocSdk | null = null;
 
 export const initializePocSdk = (config: PocSdkConfig) => {
-  sdkInstance = new PocSdk(config);
+  sdkInstance = new PocSdk({
+    token: config.token,
+    environment: config.environment || 'https://api.example.com'
+  });
   return sdkInstance;
 };
 
@@ -134,7 +40,7 @@ export const useCreatePartnerPoc = () => {
   return useMutation({
     mutationFn: async (data: any) => {
       const sdk = getPocSdk();
-      return sdk.partnerPoc.create(data);
+      return await sdk.partnerPoc.createPartnerPoc(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['partnerPocs'] });
@@ -147,7 +53,7 @@ export const useEvents = () => {
     queryKey: ['events'],
     queryFn: async () => {
       const sdk = getPocSdk();
-      return sdk.developerApi.v2.events.list();
+      return await sdk.developerApi.getEventsV2();
     },
   });
 };
@@ -157,7 +63,7 @@ export const useEvent = (eventId: string) => {
     queryKey: ['event', eventId],
     queryFn: async () => {
       const sdk = getPocSdk();
-      return sdk.developerApi.v2.events.get(eventId);
+      return await sdk.developerApi.getEventByIdV2({ eventId });
     },
     enabled: !!eventId,
   });
@@ -168,7 +74,7 @@ export const useActivityPartners = (params?: any) => {
     queryKey: ['activityPartners', params],
     queryFn: async () => {
       const sdk = getPocSdk();
-      return sdk.activityPartner.list(params);
+      return await sdk.activityPartner.getActivityPartners(params);
     },
   });
 };
@@ -179,7 +85,7 @@ export const useCreateActivityPartner = () => {
   return useMutation({
     mutationFn: async (data: any) => {
       const sdk = getPocSdk();
-      return sdk.activityPartner.create(data);
+      return await sdk.activityPartner.createActivityPartner(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activityPartners'] });
@@ -188,4 +94,3 @@ export const useCreateActivityPartner = () => {
 };
 
 export { PocSdk };
-export type { PocSdkConfig };
